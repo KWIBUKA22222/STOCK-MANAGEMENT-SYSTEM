@@ -1,0 +1,282 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock Management System</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #071b35, #123d68);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 30px 15px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 950px;
+            background: white;
+            border-radius: 18px;
+            overflow: hidden;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.25);
+        }
+
+        .header {
+            background: #073b74;
+            color: white;
+            text-align: center;
+            padding: 30px 15px;
+        }
+
+        .header h1 {
+            font-size: 27px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #dceaff;
+            font-size: 14px;
+        }
+
+        .forms {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            padding: 35px;
+        }
+
+        .form-box {
+            background: #f8fafc;
+            border: 1px solid #e1e8f0;
+            padding: 25px;
+            border-radius: 12px;
+        }
+
+        .form-box h2 {
+            color: #073b74;
+            margin-bottom: 22px;
+            font-size: 21px;
+            border-bottom: 3px solid #f4b400;
+            padding-bottom: 12px;
+        }
+
+        .form-box input {
+            width: 100%;
+            padding: 13px;
+            margin-bottom: 16px;
+            border: 1px solid #ccd5e0;
+            border-radius: 7px;
+            outline: none;
+            font-size: 14px;
+            background: white;
+        }
+
+        .form-box input:focus {
+            border-color: #073b74;
+            box-shadow: 0 0 5px rgba(7,59,116,0.2);
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            background: #073b74;
+            color: white;
+            border: none;
+            border-radius: 7px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        button:hover {
+            background: #f4b400;
+            color: #073b74;
+        }
+
+        #result-box {
+            margin: 0 35px 30px;
+            padding: 20px;
+            background: #eef4fb;
+            border-left: 5px solid #073b74;
+            border-radius: 8px;
+        }
+
+        #result-box h3 {
+            color: #073b74;
+            margin-bottom: 12px;
+        }
+
+        #result {
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
+            color: #26384b;
+            font-size: 14px;
+        }
+
+        .footer {
+            background: #073b74;
+            color: white;
+            text-align: center;
+            padding: 17px;
+            font-size: 13px;
+        }
+
+        @media (max-width: 700px) {
+            .forms {
+                grid-template-columns: 1fr;
+                padding: 20px;
+            }
+
+            #result-box {
+                margin: 0 20px 20px;
+            }
+
+            .header h1 {
+                font-size: 21px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+
+        <div class="header">
+            <h1>STOCK MANAGEMENT SYSTEM</h1>
+            <p>Manage Your Stock Efficiently and Securely</p>
+        </div>
+
+        <div class="forms">
+
+            <!-- REGISTER FORM -->
+            <div class="form-box">
+                <h2>Create Account</h2>
+
+                <input type="text" id="name"
+                    placeholder="Enter Full Name">
+
+                <input type="email" id="email"
+                    placeholder="Enter Email Address">
+
+                <input type="password" id="password"
+                    placeholder="Enter Password">
+
+                <button onclick="register()">
+                    REGISTER
+                </button>
+            </div>
+
+            <!-- LOGIN FORM -->
+            <div class="form-box">
+                <h2>Login Account</h2>
+
+                <input type="email" id="loginEmail"
+                    placeholder="Enter Email Address">
+
+                <input type="password" id="loginPassword"
+                    placeholder="Enter Password">
+
+                <button onclick="login()">
+                    LOGIN
+                </button>
+            </div>
+
+        </div>
+
+        <div id="result-box">
+            <h3>System Response</h3>
+            <pre id="result">Waiting for your action...</pre>
+        </div>
+
+        <div class="footer">
+            &copy; 2026 Stock Management System | All Rights Reserved
+        </div>
+
+    </div>
+
+    <script>
+        const API = "http://localhost:5000/api/auth";
+
+        async function register() {
+            const full_name = document.getElementById("name").value.trim();
+            const email = document.getElementById("email").value.trim();
+            const password = document.getElementById("password").value;
+
+            if (!full_name || !email || !password) {
+                showResult("Please fill in all registration fields.");
+                return;
+            }
+
+            try {
+                const response = await fetch(API + "/register", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        full_name,
+                        email,
+                        password
+                    })
+                });
+
+                const data = await response.json();
+                showResult(data);
+
+            } catch (error) {
+                showResult("Connection Error: " + error.message);
+            }
+        }
+
+        async function login() {
+            const email = document.getElementById("loginEmail").value.trim();
+            const password = document.getElementById("loginPassword").value;
+
+            if (!email || !password) {
+                showResult("Please enter your email and password.");
+                return;
+            }
+
+            try {
+                const response = await fetch(API + "/login", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        email,
+                        password
+                    })
+                });
+
+                const data = await response.json();
+                showResult(data);
+
+            } catch (error) {
+                showResult("Connection Error: " + error.message);
+            }
+        }
+
+        function showResult(data) {
+            document.getElementById("result").textContent =
+                typeof data === "string"
+                    ? data
+                    : JSON.stringify(data, null, 2);
+        }
+    </script>
+
+</body>
+</html>
